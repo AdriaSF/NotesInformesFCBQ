@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nota d'informes d'arbitratge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: precise, calm tool for a referee checking his marks
+   IDEA: an official scoresheet (acta) — ruled rows, a scoreboard total
+   PICTURE: the drop zone, then each report as a scoreboard card with four block bars
+   COLOUR and TYPE: white sheet, near-black ink, basketball orange accent, slate support; Barlow Condensed for numbers, Inter for text
+   LAYOUT: one column up to 980px; cards stack; details fold open below each card */
+:root{color-scheme:light dark;--bg:light-dark(#fbfaf8,#121315);--card:light-dark(#fff,#1b1d20);--ink:light-dark(#16171a,#ecebe8);--mute:light-dark(#62656b,#9a9da3);--rule:light-dark(#e3e1dc,#2d3035);--acc:#e8590c;--acc2:light-dark(#2f4a5c,#8fb3c9);--track:light-dark(#efede8,#26292d);--warn:light-dark(#9a3412,#fdba74);--warnbg:light-dark(#fff3e8,#2b1d12)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:980px;margin:0 auto;padding:clamp(24px,4vw,48px) max(4vw,16px) 64px}
+h1{font:700 clamp(32px,5vw,46px)/1.05 'Barlow Condensed',sans-serif;margin:0 0 6px;text-wrap:balance}
+.sub{color:var(--mute);margin:0 0 22px;max-width:62ch}
+.drop{display:grid;place-items:center;gap:6px;text-align:center;border:2px dashed var(--rule);border-radius:14px;padding:34px 18px;background:var(--card);cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--acc)}
+.drop.over{background:light-dark(#fff6f0,#24190f)}
+.drop svg{width:52px;height:52px}
+.drop b{font:600 22px/1.1 'Barlow Condensed',sans-serif;letter-spacing:.01em}
+.drop span{color:var(--mute);font-size:14px}
+.btn{font:500 15px Inter,sans-serif;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--rule);background:var(--card);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--acc)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:28px 0 12px}
+.bar h2{font:700 26px/1.1 'Barlow Condensed',sans-serif;margin:0}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;white-space:nowrap}
+th{font-weight:600;color:var(--mute);font-size:13px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td.tot{font:700 19px 'Barlow Condensed',sans-serif;color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;margin-top:16px;overflow:hidden}
+.head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;padding:18px 20px;align-items:center}
+.fname{font-weight:600;overflow-wrap:anywhere}
+.tmpl{color:var(--mute);font-size:14px}
+.score{text-align:right}
+.score .big{font:700 clamp(44px,7vw,64px)/.9 'Barlow Condensed',sans-serif;color:var(--acc);font-variant-numeric:tabular-nums}
+.score small{display:block;color:var(--mute);font-size:13px;margin-top:4px}
+.blocks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border-top:1px solid var(--rule)}
+.blk{background:var(--card);padding:12px 16px}
+.blk .t{font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk .v{font:700 24px/1.1 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums}
+.blk .v i{font-style:normal;color:var(--mute);font-size:16px;font-weight:600}
+.meter{height:6px;border-radius:3px;background:var(--track);margin-top:6px;overflow:hidden}
+.meter>div{height:100%;background:var(--acc2);border-radius:3px;transition:width .3s}
+.warn{background:var(--warnbg);color:var(--warn);font-size:14px;padding:10px 20px;border-top:1px solid var(--rule)}
+details.det{border-top:1px solid var(--rule)}
+details.det>summary{cursor:pointer;padding:12px 20px;font-weight:500;font-size:15px;min-height:44px;list-style-position:inside}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:4px 28px;padding:0 20px 18px}
+.grp h3{font:700 18px 'Barlow Condensed',sans-serif;margin:14px 0 4px;display:flex;justify-content:space-between}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 150px 44px;gap:8px;align-items:center;padding:3px 0;border-bottom:1px dotted var(--rule);font-size:14px}
+.row .w{text-align:right;color:var(--mute);font-variant-numeric:tabular-nums;font-size:13px}
+.row.miss .lbl{color:var(--warn);font-weight:600}
+select{font:15px Inter,sans-serif;min-height:34px;width:100%;border-radius:8px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);padding:0 6px}
+select.chg{border-color:var(--acc)}
+.x{border:0;background:none;color:var(--mute);font-size:22px;cursor:pointer;width:44px;height:44px;border-radius:8px}
+.x:hover{color:var(--ink);background:var(--track)}
+.empty{color:var(--mute);text-align:center;padding:22px 0 0;font-size:15px}
+.note{color:var(--mute);font-size:13px;margin-top:28px}
+details.w8{margin-top:10px;font-size:14px}
+details.w8 summary{cursor:pointer;color:var(--mute);min-height:44px;display:flex;align-items:center}
+.status{font-size:14px;color:var(--mute);min-height:20px;margin-top:8px}
+@media(max-width:640px){.blocks{grid-template-columns:repeat(2,minmax(0,1fr))}.head{grid-template-columns:minmax(0,1fr) auto}.row{grid-template-columns:minmax(0,1fr) 128px}.row .w{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div class="wrap">
+  <h1>Nota numèrica d'informes d'arbitratge</h1>
+  <p class="sub">Arrossega un o més informes en PDF i la pàgina hi aplica la plantilla de pesos de la temporada <b>26-27</b>. Els PDF es llegeixen al teu navegador i no s'envien enlloc.</p>
+
+  <label class="drop" id="drop" for="file">
+    <svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" fill="#e8590c"/><path d="M4 26h44M26 4v44M10.5 10.5c7 6 7 25 0 31M41.5 10.5c-7 6-7 25 0 31" fill="none" stroke="#7a2a04" stroke-width="2"/></svg>
+    <b>Deixa anar aquí els informes</b>
+    <span>o fes clic per triar-los · PDF de l'FCBQ, se'n poden posar diversos alhora</span>
+  </label>
+  <input type="file" id="file" accept="application/pdf,.pdf" multiple hidden>
+  <div class="status" id="status" aria-live="polite"></div>
+
+  <section id="summary" hidden>
+    <div class="bar"><h2>Resum</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="copy">Copia la taula</button><button class="btn" id="clear">Buida-ho tot</button></div></div>
+    <div class="scroll"><table id="sumt"></table></div>
+  </section>
+
+  <div id="cards"></div>
+  <p class="empty" id="empty">Encara no hi ha cap informe carregat.</p>
+
+  <details class="w8"><summary>Com es calcula la nota</summary>
+    <p>Òptim 100 % · Acceptable 60 % · Millorable 30 % · No satisfactori 0 % · No valorable no compta (surt del denominador).<br>
+    Nota del bloc = pes del bloc × Σ(pes ítem × valor) ÷ Σ pes dels ítems valorables. Pesos dels blocs: genèrics 7, tècnica 25, criteri 43, control 25.<br>
+    Nota final = suma dels 4 blocs × errades decisives (Sí ×0,9) × regles de joc (Insatisfactori ×0,9) × dificultat (Competit ×1,02, Difícil ×1,05) × actitud (Inadequada ×0,8) × autocrítica (Millorable ×0,95, Insatisfactori ×0,9).</p>
+    <p>Si un ítem no es detecta queda marcat en taronja, i pots corregir qualsevol valoració amb els desplegables: la nota es recalcula al moment.</p>
+  </details>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script>
+// Shared scoring core (inlined into the page; also used by the node test)
+const TEMPLATE={
+  name:'PISTA MASC (A/A1/A2/B1/B2/1aEABQ) 26-27',
+  blocks:[
+    {id:'gen',name:'Aspectes genèrics',w:7,items:[['Aspecte personal',20,'ASPECTEPERSONAL'],['Condició física',80,'CONDICIOFISICA']]},
+    {id:'tec',name:"Tècnica d'arbitratge",w:25,items:[['Senyalització',10,'SENYALITZACIO'],['Mecànica de cap',23,'MECANICADECAP'],['Mecànica de cua',23,'MECANICADECUA'],['Transicions',20,'TRANSICIONS'],["Treball d'equip",24,'TREBALLDEQUIP']]},
+    {id:'cri',name:'Criteri',w:43,items:[['Coherència, consistència i equilibri',17,'COHERENCIACONSISTENCIA'],['Intuïcions',5,'INTUICIONS'],['Pujada de pilota i joc exterior',6,'PUJADADEPILOTA'],['RBVD',4,'RBVD'],['Pantalles / joc sense pilota',4,'PANTALLES'],['Càrrega/bloqueig',4,'CARREGABLOQUEIG'],['Joc de pivot',4,'JOCDEPIVOT'],['Protecció del llançador',6,'PROTECCIODELLLANCADOR'],['Acció de tir / acció continuada',4,'ACCIODETIR'],['Rebot',4,'REBOT'],['Flagrants/disruptives',8,'FLAGRANTS'],['Simulacions',5,'SIMULACIONS'],['Criteri de violacions de passes',3,'CRITERIDEVIOLACIONSDEPASSES'],['Camp enrere',2,'CAMPENRERE'],['24 segons',4,'24SEGONS'],['Altres violacions temporals',2,'ALTRESVIOLACIONSTEMPORALS'],['Peus',3,'PEUS'],['Fores',3,'FORES'],['Servei i servei ràpid',4,'SERVEIISERVEI'],['Tirs lliures',2,'TIRSLLIURES'],['Doble regat',2,'DOBLEREGAT'],['Interposicions/interferències',2,'INTERPOSICIONS'],['Salt entre dos i alternança',2,'SALTENTREDOS']]},
+    {id:'con',name:'Control del partit',w:25,items:[['Comunicació amb els participants',40,'COMUNICACIOAMBELS'],["Protocol d'avisos",10,'PROTOCOLDAVISOS'],['Sancions disciplinàries',30,'SANCIONSDISCIPLINARIES'],['Gestió de la pressió',20,'GESTIODELAPRESSIO']]}
+  ],
+  ratings:[['NOSATISFACTORI','No satisfactori',0],['NOVALORABLE','No valorable',null],['OPTIMA','Òptim',1],['OPTIM','Òptim',1],['ACCEPTABLE','Acceptable',.6],['MILLORABLE','Millorable',.3]],
+  mults:[
+    {name:'Errades decisives',key:'ERRADESDECISIVES',opts:[['NO','No',1],['SI','Sí',.9]]},
+    {name:'Regles de joc',key:'REGLESDEJOC',opts:[['INSATISFACTORI','Insatisfactori',.9],['SATISFACTORI','Satisfactori',1]]},
+    {name:'Dificultat partit',key:'DIFICULTATPARTIT',opts:[['NORMAL','Normal',1],['COMPETIT','Competit amb algunes dificultats',1.02],['DIFICIL','Difícil',1.05]]},
+    {name:'Valoració actitud',key:'VALORACIOACTITUD',opts:[['INADEQUADA','Inadequada',.8],['ADEQUADA','Adequada',1]]},
+    {name:"Capacitat d'autocrítica",key:'CAPACITATDAUTOCRITICA',opts:[['INSATISFACTORI','Insatisfactori',.9],['SATISFACTORI','Satisfactori',1],['MILLORABLE','Millorable',.95]]}
+  ]
+};
+const RATING_OPTS=[['OPTIM','Òptim',1],['ACCEPTABLE','Acceptable',.6],['MILLORABLE','Millorable',.3],['NOSATISFACTORI','No satisfactori',0],['NOVALORABLE','No valorable',null]];
+function norm(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
+// lines: array of raw strings in reading order
+function parseReport(lines){
+  const L=lines.map(l=>norm(l.replace(/^\s*\d+\.\s*/,'')));
+  const find=key=>L.findIndex(l=>l.startsWith(key));
+  const pick=(key,opts,stopKeys)=>{
+    const i=find(key); if(i<0) return null;
+    const rest=L[i].slice(key.length);
+    // same line: the option must be the line's tail after the name (allow the name to be longer than key)
+    if(rest){ const o=opts.find(o=>rest.endsWith(o[0]))||opts.find(o=>rest.startsWith(o[0])); if(o) return o }
+    for(let j=i+1;j<Math.min(L.length,i+9);j++){
+      if(stopKeys.some(k=>L[j].startsWith(k))) break;
+      const o=opts.find(o=>L[j]===o[0]); if(o) return o;
+    }
+    return null;
+  };
+  const allKeys=TEMPLATE.blocks.flatMap(b=>b.items.map(it=>it[2])).concat(TEMPLATE.mults.map(m=>m.key));
+  const head=lines.slice(0,3).join(' ');
+  const out={template:(head.match(/(PISTA|V[ÍI]DEO)\s+(MASC|FEM)[^\n]*?\d{4}/i)||[''])[0].trim(),items:{},mults:{},missing:[]};
+  for(const b of TEMPLATE.blocks) for(const it of b.items){
+    const o=pick(it[2],TEMPLATE.ratings,allKeys.filter(k=>k!==it[2]));
+    if(o) out.items[it[2]]=o[0]==='OPTIMA'?'OPTIM':o[0]; else {out.items[it[2]]=null;out.missing.push(it[0])}
+  }
+  for(const m of TEMPLATE.mults){
+    const o=pick(m.key,m.opts,allKeys.filter(k=>k!==m.key));
+    if(o) out.mults[m.key]=o[0]; else {out.mults[m.key]=m.opts.find(x=>x[2]===1)[0];out.missing.push(m.name)}
+  }
+  return out;
+}
+function score(items,mults){
+  const blocks=TEMPLATE.blocks.map(b=>{
+    let num=0,den=0;
+    for(const it of b.items){const v=(RATING_OPTS.find(r=>r[0]===items[it[2]])||[])[2]; if(v===undefined||v===null) continue; num+=it[1]*v;den+=it[1]}
+    return {id:b.id,name:b.name,w:b.w,pct:den?num/den:null,pts:den?b.w*num/den:0};
+  });
+  const base=blocks.reduce((s,b)=>s+b.pts,0);
+  const mult=TEMPLATE.mults.reduce((p,m)=>p*m.opts.find(o=>o[0]===mults[m.key])[2],1);
+  return {blocks,base,mult,total:base*mult};
+}
+// pdf.js text content -> lines
+function itemsToLines(items){
+  const rows=[];
+  for(const t of items){ if(!t.str||!t.str.trim()) continue; const y=t.transform[5],x=t.transform[4];
+    let r=rows.find(r=>Math.abs(r.y-y)<2.5); if(!r){r={y,parts:[]};rows.push(r)} r.parts.push({x,s:t.str}) }
+  rows.sort((a,b)=>b.y-a.y);
+  return rows.map(r=>r.parts.sort((a,b)=>a.x-b.x).map(p=>p.s).join(' '));
+}
+
+
+{
+const $=s=>document.querySelector(s);
+const fmt=n=>n.toLocaleString('ca-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reports=[];let uid=0;
+try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}catch(e){}
+
+async function readPdf(file){
+  const doc=await pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  let lines=[];
+  for(let p=1;p<=doc.numPages;p++){const tc=await (await doc.getPage(p)).getTextContent();lines=lines.concat(itemsToLines(tc.items))}
+  return lines;
+}
+function teams(lines){
+  const all=lines.join('\n');
+  let name=(all.match(/·\s*([^·\n]+?)\s*·\s*Generat el/)||[])[1];
+  if(!name){const m=lines.map(l=>l.match(/\d{3,6}\s*-\s*(.+?)\s+(?:ÀRBITRE|AUXILIAR|OFICIAL)/i)).find(m=>m);name=m&&m[1]}
+  const date=(all.match(/\b\d{2}\/\d{2}\/\d{4}\b/)||[])[0];
+  const sc=lines.map(l=>l.match(/(?:^|\s)(\d{1,3})\s*[–-]\s*(\d{1,3})(?:\s|$)/)).find(m=>m);
+  return [name&&name.trim(),date,sc&&`${sc[1]}–${sc[2]}`].filter(Boolean).join(' · ');
+}
+async function addFiles(files){
+  const pdfs=[...files].filter(f=>/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name));
+  if(!pdfs.length){$('#status').textContent='Només es poden carregar fitxers PDF.';return}
+  let ok=0,bad=[];
+  for(const f of pdfs){
+    $('#status').textContent=`Llegint ${f.name}…`;
+    try{
+      const lines=await readPdf(f);const r=parseReport(lines);
+      const found=TEMPLATE.blocks.flatMap(b=>b.items).filter(it=>r.items[it[2]]).length;
+      if(found<5){bad.push(f.name);continue}
+      reports.push({id:++uid,name:f.name,match:teams(lines),template:r.template,items:{...r.items},orig:{...r.items},mults:{...r.mults},origM:{...r.mults},missing:r.missing});ok++;
+    }catch(e){bad.push(f.name)}
+  }
+  $('#status').textContent=(ok?`${ok} informe${ok>1?'s':''} afegit${ok>1?'s':''}.`:'')+(bad.length?` No s'ha pogut llegir com a informe: ${bad.join(', ')}.`:'');
+  render();
+}
+function opt(list,val){return list.map(o=>`<option value="${o[0]}"${o[0]===val?' selected':''}>${esc(o[1])}</option>`).join('')}
+function card(r){
+  const s=score(r.items,r.mults);
+  const notMasc=r.template&&!/PISTA\s+MASC/i.test(r.template);
+  const miss=TEMPLATE.blocks.flatMap(b=>b.items).filter(it=>!r.items[it[2]]).map(it=>it[0]);
+  const multTxt=s.mult===1?'sense multiplicadors':`suma ${fmt(s.base)} × ${s.mult.toLocaleString('ca-ES',{maximumFractionDigits:4})}`;
+  return `<article class="card" data-id="${r.id}">
+  <div class="head"><div><div class="fname">${esc(r.match||r.name)}</div><div class="tmpl">${esc(r.match?r.name+' · ':'')}${esc(r.template||'Plantilla no identificada')}</div></div>
+  <div style="display:flex;align-items:flex-start;gap:6px"><div class="score"><div class="big">${fmt(s.total)}</div><small>${multTxt}</small></div><button class="x" data-del="${r.id}" aria-label="Treu aquest informe">×</button></div></div>
+  <div class="blocks">${s.blocks.map(b=>`<div class="blk"><div class="t">${esc(b.name)}</div><div class="v">${fmt(b.pts)} <i>/ ${b.w}</i></div><div class="meter"><div style="width:${b.pct===null?0:b.pct*100}%"></div></div></div>`).join('')}</div>
+  ${miss.length?`<div class="warn">No s'ha detectat la valoració de: ${esc(miss.join(', '))}. Ara no compten; obre el detall per posar-la a mà.</div>`:''}
+  <details class="det"${miss.length?' open':''}><summary>Detall i correccions</summary><div class="grid">
+  ${TEMPLATE.blocks.map((b,bi)=>`<div class="grp"><h3><span>${esc(b.name)}</span><span>${fmt(s.blocks[bi].pts)}</span></h3>${b.items.map(it=>`<div class="row${r.items[it[2]]?'':' miss'}"><span class="lbl">${esc(it[0])}</span><select data-k="${it[2]}" class="${r.items[it[2]]!==r.orig[it[2]]?'chg':''}" aria-label="${esc(it[0])}">${r.items[it[2]]?'':'<option value="">— no detectat —</option>'}${opt(RATING_OPTS,r.items[it[2]])}</select><span class="w">${it[1]}</span></div>`).join('')}</div>`).join('')}
+  <div class="grp"><h3><span>Multiplicadors</span><span>×${s.mult.toLocaleString('ca-ES',{maximumFractionDigits:4})}</span></h3>${TEMPLATE.mults.map(m=>`<div class="row"><span class="lbl">${esc(m.name)}</span><select data-m="${m.key}" class="${r.mults[m.key]!==r.origM[m.key]?'chg':''}" aria-label="${esc(m.name)}">${opt(m.opts.map(o=>[o[0],`${o[1]} ×${String(o[2]).replace('.',',')}`]),r.mults[m.key])}</select><span class="w"></span></div>`).join('')}</div>
+  </div></details></article>`;
+}
+function render(){
+  const open=new Set([...document.querySelectorAll('.card details[open]')].map(d=>d.closest('.card').dataset.id));
+  $('#cards').innerHTML=reports.map(card).join('');
+  for(const d of document.querySelectorAll('.card details')) if(open.has(d.closest('.card').dataset.id)) d.open=true;
+  $('#empty').hidden=reports.length>0;
+  $('#summary').hidden=reports.length<1;
+  $('#sumt').innerHTML='<thead><tr><th>Informe</th>'+TEMPLATE.blocks.map(b=>`<th class="n">${esc(b.name.split(' ')[0])} (${b.w})</th>`).join('')+'<th class="n">Mult.</th><th class="n">Nota</th></tr></thead><tbody>'+
+    reports.map(r=>{const s=score(r.items,r.mults);return `<tr><td>${esc(r.match||r.name)}</td>${s.blocks.map(b=>`<td class="n">${fmt(b.pts)}</td>`).join('')}<td class="n">×${s.mult.toLocaleString('ca-ES',{maximumFractionDigits:4})}</td><td class="n tot">${fmt(s.total)}</td></tr>`}).join('')+
+    (reports.length>1?`<tr><td><b>Mitjana</b></td>${TEMPLATE.blocks.map((b,i)=>`<td class="n">${fmt(reports.reduce((a,r)=>a+score(r.items,r.mults).blocks[i].pts,0)/reports.length)}</td>`).join('')}<td></td><td class="n tot">${fmt(reports.reduce((a,r)=>a+score(r.items,r.mults).total,0)/reports.length)}</td></tr>`:'')+'</tbody>';
+}
+const drop=$('#drop');
+['dragenter','dragover'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',ev=>addFiles(ev.dataTransfer.files));
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();if(!drop.contains(e.target))addFiles(e.dataTransfer.files)});
+$('#file').addEventListener('change',e=>{addFiles(e.target.files);e.target.value=''});
+$('#cards').addEventListener('change',e=>{
+  const c=e.target.closest('.card');if(!c)return;const r=reports.find(x=>x.id==c.dataset.id);
+  if(e.target.dataset.k){r.items[e.target.dataset.k]=e.target.value||null}
+  if(e.target.dataset.m){r.mults[e.target.dataset.m]=e.target.value}
+  render();
+});
+$('#cards').addEventListener('click',e=>{const id=e.target.dataset.del;if(!id)return;reports.splice(reports.findIndex(r=>r.id==id),1);render()});
+$('#clear').addEventListener('click',()=>{reports.length=0;$('#status').textContent='';render()});
+$('#copy').addEventListener('click',async()=>{
+  const rows=[['Informe',...TEMPLATE.blocks.map(b=>b.name),'Multiplicador','Nota']].concat(reports.map(r=>{const s=score(r.items,r.mults);return [r.match||r.name,...s.blocks.map(b=>fmt(b.pts)),String(s.mult).replace('.',','),fmt(s.total)]}));
+  try{await navigator.clipboard.writeText(rows.map(r=>r.join('\t')).join('\n'));$('#copy').textContent='Copiat ✓'}catch(err){$('#copy').textContent='No s\'ha pogut copiar'}
+  setTimeout(()=>$('#copy').textContent='Copia la taula',1800);
+});
+render();
+}
+</script>
+</body></html>
